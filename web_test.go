@@ -12,25 +12,118 @@
  * copies or substantial portions of the Software.
  */
 
-package test
+package web
 
 import (
 	"bytes"
 	"context"
 	"github.com/goioc/di"
-	"github.com/goioc/web"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"reflect"
 	"strings"
 	"testing"
 )
 
 var server *httptest.Server
+
+type endpoint1 struct {
+	method interface{} `web.methods:"GET"`
+	path   interface{} `web.path:"/endpoint1"`
+}
+
+func (e endpoint1) HandlerFuncName() string {
+	return "REST"
+}
+
+func (e *endpoint1) REST(w http.ResponseWriter) {
+	_, err := w.Write([]byte("test"))
+	if err != nil {
+		panic(err)
+	}
+}
+
+type endpoint2 struct {
+	method interface{} `web.methods:"post,patch"`
+	path   interface{} `web.path:"/endpoint2"`
+}
+
+func (e endpoint2) HandlerFuncName() string {
+	return "REST"
+}
+
+func (e *endpoint2) REST(w http.ResponseWriter, r *http.Request) {
+	all, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		panic(err)
+	}
+	_, err = w.Write(all)
+	if err != nil {
+		panic(err)
+	}
+}
+
+type endpoint3 struct {
+	method  interface{} `web.methods:"GET"`
+	path    interface{} `web.path:"/endpoint3"`
+	queries interface{} `web.queries:"foo,bar,id,{id:[0-9]+}"`
+}
+
+func (e endpoint3) HandlerFuncName() string {
+	return "REST"
+}
+
+func (e *endpoint3) REST(queryParams url.Values) string {
+	foo := queryParams.Get("foo")
+	id := queryParams.Get("id")
+	return foo + id
+}
+
+type endpoint4 struct {
+	method  interface{} `web.methods:"POST"`
+	path    interface{} `web.path:"/endpoint4"`
+	headers interface{} `web.headers:"Content-Type,text/plain"`
+}
+
+func (e endpoint4) HandlerFuncName() string {
+	return "REST"
+}
+
+func (e *endpoint4) REST(body string) string {
+	return body
+}
+
+type endpoint5 struct {
+	method  interface{} `web.methods:"GET"`
+	path    interface{} `web.path:"/endpoint5/{key}/{*?}"`
+	headers interface{} `web.matcher:"matcher"`
+}
+
+func (e endpoint5) HandlerFuncName() string {
+	return "REST"
+}
+
+func (e *endpoint5) REST(pathParams map[string]string) string {
+	return pathParams["key"]
+}
+
+type endpoint6 struct {
+	method interface{} `web.methods:"GET"`
+	path   interface{} `web.path:"/endpoint6"`
+}
+
+func (e endpoint6) HandlerFuncName() string {
+	return "REST"
+}
+
+func (e *endpoint6) REST(ctx context.Context) string {
+	return ctx.Value(di.BeanKey("key")).(string)
+}
 
 type TestSuite struct {
 	suite.Suite
@@ -58,12 +151,12 @@ func (suite *TestSuite) SetupSuite() {
 	assert.NoError(suite.T(), err)
 	err = di.InitializeContainer()
 	assert.NoError(suite.T(), err)
-	web.Use(func(next http.Handler) http.Handler {
+	Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), di.BeanKey("key"), "value")))
 		})
 	})
-	router, err := web.CreateRouter()
+	router, err := CreateRouter()
 	assert.NoError(suite.T(), err)
 	server = httptest.NewServer(router)
 }
