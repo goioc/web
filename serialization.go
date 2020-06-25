@@ -20,6 +20,7 @@ import (
 	"reflect"
 )
 
+// ResponseSerializer is an ID for Serializer bean. By default, points to JsonSerializer, but can be overwritten.
 const ResponseSerializer = "responseSerializer"
 
 func init() {
@@ -28,18 +29,24 @@ func init() {
 	}
 }
 
+// Serializer interface is used by web library to serialize/deserialize objects. Default implementation: JsonSerializer.
 type Serializer interface {
+	// Serialize method serializes object to byte array.
 	Serialize(interface{}) ([]byte, error)
+	// Deserialize method deserializes object from byte array.
 	Deserialize([]byte, interface{}) error
 }
 
+// JsonSerializer is a default implementation of Serializer interface.
 type JsonSerializer struct {
 }
 
+// Serialize method serializes object to JSON.
 func (js JsonSerializer) Serialize(v interface{}) ([]byte, error) {
 	return json.Marshal(v)
 }
 
+// Deserialize method deserializes object from JSON.
 func (js JsonSerializer) Deserialize(data []byte, v interface{}) error {
 	return json.Unmarshal(data, v)
 }

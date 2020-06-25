@@ -60,7 +60,7 @@ func (suite *TestSuite) SetupSuite() {
 	assert.NoError(suite.T(), err)
 	web.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), "key", "value")))
+			next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), di.BeanKey("key"), "value")))
 		})
 	})
 	router, err := web.CreateRouter()

@@ -14,7 +14,10 @@
 
 package test
 
-import "context"
+import (
+	"context"
+	"github.com/goioc/di"
+)
 
 type endpoint6 struct {
 	method interface{} `web.methods:"GET"`
@@ -26,5 +29,5 @@ func (e endpoint6) HandlerFuncName() string {
 }
 
 func (e *endpoint6) REST(ctx context.Context) string {
-	return ctx.Value("key").(string)
+	return ctx.Value(di.BeanKey("key")).(string)
 }
