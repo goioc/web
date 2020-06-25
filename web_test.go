@@ -21,6 +21,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	htmlTemplate "html/template"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -29,6 +30,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	textTemplate "text/template"
 )
 
 var server *httptest.Server
@@ -305,6 +307,85 @@ func (e *endpoint17) REST() io.ReadCloser {
 	return ioutil.NopCloser(bytes.NewBufferString("test"))
 }
 
+const htmlTmpl = `<h1>{{.PageTitle}}</h1>
+<ul>
+{{range .Todos}}
+{{if .Done}}
+<li class="done">{{.Title}}</li>
+{{else}}
+<li>{{.Title}}</li>
+{{end}}
+{{end}}
+</ul>`
+
+const htmlPage = `<h1>My TODO list</h1>
+<ul>
+
+
+<li>Task 1</li>
+
+
+
+<li class="done">Task 2</li>
+
+
+
+<li class="done">Task 3</li>
+
+
+</ul>`
+
+type todo struct {
+	Title string
+	Done  bool
+}
+type todoPageData struct {
+	PageTitle string
+	Todos     []todo
+}
+
+type endpoint18 struct {
+	method interface{} `web.methods:"GET"`
+	path   interface{} `web.path:"/endpoint18"`
+}
+
+func (e endpoint18) HandlerFuncName() string {
+	return "REST"
+}
+
+func (e *endpoint18) REST() (htmlTemplate.Template, interface{}) {
+	tmpl := htmlTemplate.Must(htmlTemplate.New("test").Parse(htmlTmpl))
+	return *tmpl, todoPageData{
+		PageTitle: "My TODO list",
+		Todos: []todo{
+			{Title: "Task 1", Done: false},
+			{Title: "Task 2", Done: true},
+			{Title: "Task 3", Done: true},
+		},
+	}
+}
+
+type endpoint19 struct {
+	method interface{} `web.methods:"GET"`
+	path   interface{} `web.path:"/endpoint19"`
+}
+
+func (e endpoint19) HandlerFuncName() string {
+	return "REST"
+}
+
+func (e *endpoint19) REST() (textTemplate.Template, interface{}) {
+	tmpl := textTemplate.Must(textTemplate.New("test").Parse(htmlTmpl))
+	return *tmpl, todoPageData{
+		PageTitle: "My TODO list",
+		Todos: []todo{
+			{Title: "Task 1", Done: false},
+			{Title: "Task 2", Done: true},
+			{Title: "Task 3", Done: true},
+		},
+	}
+}
+
 type TestSuite struct {
 	suite.Suite
 }
@@ -350,6 +431,10 @@ func (suite *TestSuite) SetupSuite() {
 	_, err = di.RegisterBean("endpoint16", reflect.TypeOf((*endpoint16)(nil)))
 	assert.NoError(suite.T(), err)
 	_, err = di.RegisterBean("endpoint17", reflect.TypeOf((*endpoint17)(nil)))
+	assert.NoError(suite.T(), err)
+	_, err = di.RegisterBean("endpoint18", reflect.TypeOf((*endpoint18)(nil)))
+	assert.NoError(suite.T(), err)
+	_, err = di.RegisterBean("endpoint19", reflect.TypeOf((*endpoint19)(nil)))
 	assert.NoError(suite.T(), err)
 	err = di.InitializeContainer()
 	assert.NoError(suite.T(), err)
@@ -546,4 +631,22 @@ func (suite *TestSuite) TestEndpoint17() {
 	all, err := ioutil.ReadAll(response.Body)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), "test", string(all))
+}
+
+func (suite *TestSuite) TestEndpoint18() {
+	response, err := http.Get(server.URL + "/endpoint18")
+	assert.NotNil(suite.T(), response)
+	assert.NoError(suite.T(), err)
+	all, err := ioutil.ReadAll(response.Body)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), htmlPage, string(all))
+}
+
+func (suite *TestSuite) TestEndpoint19() {
+	response, err := http.Get(server.URL + "/endpoint19")
+	assert.NotNil(suite.T(), response)
+	assert.NoError(suite.T(), err)
+	all, err := ioutil.ReadAll(response.Body)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), htmlPage, string(all))
 }

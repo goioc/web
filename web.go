@@ -20,12 +20,14 @@ import (
 	"github.com/goioc/di"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+	htmlTemplate "html/template"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"reflect"
 	"strings"
+	textTemplate "text/template"
 )
 
 const (
@@ -203,7 +205,8 @@ func createHandler(endpoint Endpoint) http.Handler {
 			}
 		}
 		results := handlerFunc.Call(arguments)
-		for _, result := range results {
+	L:
+		for i, result := range results {
 			value := result.Interface()
 			switch result.Type() {
 			case reflect.TypeOf((*int)(nil)).Elem():
@@ -218,15 +221,18 @@ func createHandler(endpoint Endpoint) http.Handler {
 				if _, err := w.Write([]byte(value.(string))); err != nil {
 					panic(err)
 				}
+				break L
 			case reflect.TypeOf((*[]byte)(nil)).Elem():
 				if _, err := w.Write(value.([]byte)); err != nil {
 					panic(err)
 				}
+				break L
 			case reflect.TypeOf((*io.Reader)(nil)).Elem():
 				readCloser := value.(io.Reader)
 				if _, err := io.Copy(w, readCloser); err != nil {
 					panic(err)
 				}
+				break L
 			case reflect.TypeOf((*io.ReadCloser)(nil)).Elem():
 				readCloser := value.(io.ReadCloser)
 				if _, err := io.Copy(w, readCloser); err != nil {
@@ -235,6 +241,19 @@ func createHandler(endpoint Endpoint) http.Handler {
 				if err := readCloser.Close(); err != nil {
 					panic(err)
 				}
+				break L
+			case reflect.TypeOf((*htmlTemplate.Template)(nil)).Elem():
+				tmpl := value.(htmlTemplate.Template)
+				if err := tmpl.Execute(w, results[i+1].Interface()); err != nil {
+					panic(err)
+				}
+				break L
+			case reflect.TypeOf((*textTemplate.Template)(nil)).Elem():
+				tmpl := value.(textTemplate.Template)
+				if err := tmpl.Execute(w, results[i+1].Interface()); err != nil {
+					panic(err)
+				}
+				break L
 			default:
 				if result.Type().Implements(reflect.TypeOf((*encoding.BinaryMarshaler)(nil)).Elem()) ||
 					reflect.PtrTo(result.Type()).Implements(reflect.TypeOf((*encoding.BinaryMarshaler)(nil)).Elem()) {
@@ -269,6 +288,7 @@ func createHandler(endpoint Endpoint) http.Handler {
 						panic(err)
 					}
 				}
+				break L
 			}
 		}
 	})
