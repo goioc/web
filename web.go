@@ -38,7 +38,9 @@ const (
 
 var middlewareFunctionsInternal []mux.MiddlewareFunc
 
+// Endpoint is an interface representing web endpoint.
 type Endpoint interface {
+	// HandlerFuncName should return a method name that is going to be used to create http handler.
 	HandlerFuncName() string
 }
 
