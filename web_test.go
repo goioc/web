@@ -21,6 +21,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -125,6 +126,66 @@ func (e *endpoint6) REST(ctx context.Context) string {
 	return ctx.Value(di.BeanKey("key")).(string)
 }
 
+type endpoint7 struct {
+	method interface{} `web.methods:"POST"`
+	path   interface{} `web.path:"/endpoint7"`
+}
+
+func (e endpoint7) HandlerFuncName() string {
+	return "REST"
+}
+
+func (e *endpoint7) REST(header http.Header) string {
+	return header.Get("Content-Type")
+}
+
+type endpoint8 struct {
+	method interface{} `web.methods:"POST"`
+	path   interface{} `web.path:"/endpoint8"`
+}
+
+func (e endpoint8) HandlerFuncName() string {
+	return "REST"
+}
+
+func (e *endpoint8) REST(reader io.Reader) string {
+	all, err := ioutil.ReadAll(reader)
+	if err != nil {
+		panic(err)
+	}
+	return string(all)
+}
+
+type endpoint9 struct {
+	method interface{} `web.methods:"POST"`
+	path   interface{} `web.path:"/endpoint9"`
+}
+
+func (e endpoint9) HandlerFuncName() string {
+	return "REST"
+}
+
+func (e *endpoint9) REST(readCloser io.ReadCloser) string {
+	all, err := ioutil.ReadAll(readCloser)
+	if err != nil {
+		panic(err)
+	}
+	return string(all)
+}
+
+type endpoint10 struct {
+	method interface{} `web.methods:"POST"`
+	path   interface{} `web.path:"/endpoint10"`
+}
+
+func (e endpoint10) HandlerFuncName() string {
+	return "REST"
+}
+
+func (e *endpoint10) REST(body []byte) string {
+	return string(body)
+}
+
 type TestSuite struct {
 	suite.Suite
 }
@@ -148,6 +209,14 @@ func (suite *TestSuite) SetupSuite() {
 	_, err = di.RegisterBean("endpoint5", reflect.TypeOf((*endpoint5)(nil)))
 	assert.NoError(suite.T(), err)
 	_, err = di.RegisterBean("endpoint6", reflect.TypeOf((*endpoint6)(nil)))
+	assert.NoError(suite.T(), err)
+	_, err = di.RegisterBean("endpoint7", reflect.TypeOf((*endpoint7)(nil)))
+	assert.NoError(suite.T(), err)
+	_, err = di.RegisterBean("endpoint8", reflect.TypeOf((*endpoint8)(nil)))
+	assert.NoError(suite.T(), err)
+	_, err = di.RegisterBean("endpoint9", reflect.TypeOf((*endpoint9)(nil)))
+	assert.NoError(suite.T(), err)
+	_, err = di.RegisterBean("endpoint10", reflect.TypeOf((*endpoint10)(nil)))
 	assert.NoError(suite.T(), err)
 	err = di.InitializeContainer()
 	assert.NoError(suite.T(), err)
@@ -183,7 +252,6 @@ func (suite *TestSuite) TestEndpoint2() {
 	assert.NotNil(suite.T(), response)
 	assert.NoError(suite.T(), err)
 	all, err := ioutil.ReadAll(response.Body)
-	assert.NotNil(suite.T(), all)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), "test", string(all))
 	buf = bytes.NewBufferString("test")
@@ -241,4 +309,43 @@ func (suite *TestSuite) TestEndpoint6() {
 	all, err := ioutil.ReadAll(response.Body)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), "value", string(all))
+}
+
+func (suite *TestSuite) TestEndpoint7() {
+	response, err := http.Post(server.URL+"/endpoint7", "application/json", nil)
+	assert.NotNil(suite.T(), response)
+	assert.NoError(suite.T(), err)
+	all, err := ioutil.ReadAll(response.Body)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), "application/json", string(all))
+}
+
+func (suite *TestSuite) TestEndpoint8() {
+	buf := bytes.NewBufferString("test")
+	response, err := http.Post(server.URL+"/endpoint8", "", buf)
+	assert.NotNil(suite.T(), response)
+	assert.NoError(suite.T(), err)
+	all, err := ioutil.ReadAll(response.Body)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), "test", string(all))
+}
+
+func (suite *TestSuite) TestEndpoint9() {
+	buf := bytes.NewBufferString("test")
+	response, err := http.Post(server.URL+"/endpoint9", "", buf)
+	assert.NotNil(suite.T(), response)
+	assert.NoError(suite.T(), err)
+	all, err := ioutil.ReadAll(response.Body)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), "test", string(all))
+}
+
+func (suite *TestSuite) TestEndpoint10() {
+	buf := bytes.NewBufferString("test")
+	response, err := http.Post(server.URL+"/endpoint10", "", buf)
+	assert.NotNil(suite.T(), response)
+	assert.NoError(suite.T(), err)
+	all, err := ioutil.ReadAll(response.Body)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), "test", string(all))
 }

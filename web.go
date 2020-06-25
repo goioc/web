@@ -149,13 +149,13 @@ func createHandler(endpoint Endpoint) http.Handler {
 				arguments = append(arguments, reflect.ValueOf(w))
 			case reflect.TypeOf((*http.Request)(nil)):
 				arguments = append(arguments, reflect.ValueOf(r))
-			case reflect.TypeOf((*http.Header)(nil)):
+			case reflect.TypeOf((*http.Header)(nil)).Elem():
 				arguments = append(arguments, reflect.ValueOf(r.Header))
-			case reflect.TypeOf((*io.Reader)(nil)):
+			case reflect.TypeOf((*io.Reader)(nil)).Elem():
 				arguments = append(arguments, reflect.ValueOf(r.Body))
-			case reflect.TypeOf((*io.ReadCloser)(nil)):
+			case reflect.TypeOf((*io.ReadCloser)(nil)).Elem():
 				arguments = append(arguments, reflect.ValueOf(r.Body))
-			case reflect.TypeOf((*[]byte)(nil)):
+			case reflect.TypeOf((*[]byte)(nil)).Elem():
 				all, err := ioutil.ReadAll(r.Body)
 				if err != nil {
 					panic(err)
