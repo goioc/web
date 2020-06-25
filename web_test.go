@@ -216,7 +216,7 @@ type textStruct struct {
 	a string
 }
 
-func (t *textStruct) MarshalBinary() (data []byte, err error) {
+func (t *textStruct) MarshalText() (data []byte, err error) {
 	return []byte(t.a), nil
 }
 
