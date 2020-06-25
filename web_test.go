@@ -186,6 +186,63 @@ func (e *endpoint10) REST(body []byte) string {
 	return string(body)
 }
 
+type binaryUnmarshalableStruct struct {
+	a string
+}
+
+func (b *binaryUnmarshalableStruct) UnmarshalBinary(data []byte) error {
+	b.a = string(data)
+	return nil
+}
+
+type endpoint11 struct {
+	method interface{} `web.methods:"POST"`
+	path   interface{} `web.path:"/endpoint11"`
+}
+
+func (e endpoint11) HandlerFuncName() string {
+	return "REST"
+}
+
+func (e *endpoint11) REST(body binaryUnmarshalableStruct) string {
+	return body.a
+}
+
+type textUnmarshalableStruct struct {
+	a string
+}
+
+func (b *textUnmarshalableStruct) UnmarshalText(data []byte) error {
+	b.a = string(data)
+	return nil
+}
+
+type endpoint12 struct {
+	method interface{} `web.methods:"POST"`
+	path   interface{} `web.path:"/endpoint12"`
+}
+
+func (e endpoint12) HandlerFuncName() string {
+	return "REST"
+}
+
+func (e *endpoint12) REST(body textUnmarshalableStruct) string {
+	return body.a
+}
+
+type endpoint13 struct {
+	method interface{} `web.methods:"POST"`
+	path   interface{} `web.path:"/endpoint13"`
+}
+
+func (e endpoint13) HandlerFuncName() string {
+	return "REST"
+}
+
+func (e *endpoint13) REST(body outerStruct) outerStruct {
+	return body
+}
+
 type TestSuite struct {
 	suite.Suite
 }
@@ -217,6 +274,12 @@ func (suite *TestSuite) SetupSuite() {
 	_, err = di.RegisterBean("endpoint9", reflect.TypeOf((*endpoint9)(nil)))
 	assert.NoError(suite.T(), err)
 	_, err = di.RegisterBean("endpoint10", reflect.TypeOf((*endpoint10)(nil)))
+	assert.NoError(suite.T(), err)
+	_, err = di.RegisterBean("endpoint11", reflect.TypeOf((*endpoint11)(nil)))
+	assert.NoError(suite.T(), err)
+	_, err = di.RegisterBean("endpoint12", reflect.TypeOf((*endpoint12)(nil)))
+	assert.NoError(suite.T(), err)
+	_, err = di.RegisterBean("endpoint13", reflect.TypeOf((*endpoint13)(nil)))
 	assert.NoError(suite.T(), err)
 	err = di.InitializeContainer()
 	assert.NoError(suite.T(), err)
@@ -348,4 +411,34 @@ func (suite *TestSuite) TestEndpoint10() {
 	all, err := ioutil.ReadAll(response.Body)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), "test", string(all))
+}
+
+func (suite *TestSuite) TestEndpoint11() {
+	buf := bytes.NewBufferString("test")
+	response, err := http.Post(server.URL+"/endpoint11", "", buf)
+	assert.NotNil(suite.T(), response)
+	assert.NoError(suite.T(), err)
+	all, err := ioutil.ReadAll(response.Body)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), "test", string(all))
+}
+
+func (suite *TestSuite) TestEndpoint12() {
+	buf := bytes.NewBufferString("test")
+	response, err := http.Post(server.URL+"/endpoint12", "", buf)
+	assert.NotNil(suite.T(), response)
+	assert.NoError(suite.T(), err)
+	all, err := ioutil.ReadAll(response.Body)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), "test", string(all))
+}
+
+func (suite *TestSuite) TestEndpoint13() {
+	buf := bytes.NewBufferString(jsonData)
+	response, err := http.Post(server.URL+"/endpoint13", "", buf)
+	assert.NotNil(suite.T(), response)
+	assert.NoError(suite.T(), err)
+	all, err := ioutil.ReadAll(response.Body)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), jsonData, string(all))
 }
