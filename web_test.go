@@ -243,6 +243,60 @@ func (e *endpoint13) REST(body outerStruct) outerStruct {
 	return body
 }
 
+type endpoint14 struct {
+	method interface{} `web.methods:"GET"`
+	path   interface{} `web.path:"/endpoint14"`
+}
+
+func (e endpoint14) HandlerFuncName() string {
+	return "REST"
+}
+
+func (e *endpoint14) REST() (http.Header, int) {
+	return map[string][]string{
+		"my-header": {"my-header-value"},
+	}, 418
+}
+
+type endpoint15 struct {
+	method interface{} `web.methods:"GET"`
+	path   interface{} `web.path:"/endpoint15"`
+}
+
+func (e endpoint15) HandlerFuncName() string {
+	return "REST"
+}
+
+func (e *endpoint15) REST() []byte {
+	return []byte("test")
+}
+
+type endpoint16 struct {
+	method interface{} `web.methods:"GET"`
+	path   interface{} `web.path:"/endpoint16"`
+}
+
+func (e endpoint16) HandlerFuncName() string {
+	return "REST"
+}
+
+func (e *endpoint16) REST() io.Reader {
+	return bytes.NewBufferString("test")
+}
+
+type endpoint17 struct {
+	method interface{} `web.methods:"GET"`
+	path   interface{} `web.path:"/endpoint17"`
+}
+
+func (e endpoint17) HandlerFuncName() string {
+	return "REST"
+}
+
+func (e *endpoint17) REST() io.Reader {
+	return ioutil.NopCloser(bytes.NewBufferString("test"))
+}
+
 type TestSuite struct {
 	suite.Suite
 }
@@ -280,6 +334,14 @@ func (suite *TestSuite) SetupSuite() {
 	_, err = di.RegisterBean("endpoint12", reflect.TypeOf((*endpoint12)(nil)))
 	assert.NoError(suite.T(), err)
 	_, err = di.RegisterBean("endpoint13", reflect.TypeOf((*endpoint13)(nil)))
+	assert.NoError(suite.T(), err)
+	_, err = di.RegisterBean("endpoint14", reflect.TypeOf((*endpoint14)(nil)))
+	assert.NoError(suite.T(), err)
+	_, err = di.RegisterBean("endpoint15", reflect.TypeOf((*endpoint15)(nil)))
+	assert.NoError(suite.T(), err)
+	_, err = di.RegisterBean("endpoint16", reflect.TypeOf((*endpoint16)(nil)))
+	assert.NoError(suite.T(), err)
+	_, err = di.RegisterBean("endpoint17", reflect.TypeOf((*endpoint17)(nil)))
 	assert.NoError(suite.T(), err)
 	err = di.InitializeContainer()
 	assert.NoError(suite.T(), err)
@@ -441,4 +503,39 @@ func (suite *TestSuite) TestEndpoint13() {
 	all, err := ioutil.ReadAll(response.Body)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), jsonData, string(all))
+}
+
+func (suite *TestSuite) TestEndpoint14() {
+	response, err := http.Get(server.URL + "/endpoint14")
+	assert.NotNil(suite.T(), response)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), 418, response.StatusCode)
+	assert.Equal(suite.T(), "my-header-value", response.Header.Get("my-header"))
+}
+
+func (suite *TestSuite) TestEndpoint15() {
+	response, err := http.Get(server.URL + "/endpoint15")
+	assert.NotNil(suite.T(), response)
+	assert.NoError(suite.T(), err)
+	all, err := ioutil.ReadAll(response.Body)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), "test", string(all))
+}
+
+func (suite *TestSuite) TestEndpoint16() {
+	response, err := http.Get(server.URL + "/endpoint16")
+	assert.NotNil(suite.T(), response)
+	assert.NoError(suite.T(), err)
+	all, err := ioutil.ReadAll(response.Body)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), "test", string(all))
+}
+
+func (suite *TestSuite) TestEndpoint17() {
+	response, err := http.Get(server.URL + "/endpoint17")
+	assert.NotNil(suite.T(), response)
+	assert.NoError(suite.T(), err)
+	all, err := ioutil.ReadAll(response.Body)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), "test", string(all))
 }
