@@ -191,7 +191,7 @@ func createHandler(endpoint Endpoint) http.Handler {
 					}
 					arguments = append(arguments, reflect.ValueOf(textUnmarshaler).Elem())
 				} else {
-					webResponseSerializer, err := di.GetInstanceSafe(ResponseSerializer)
+					webResponseSerializer, err := di.GetInstanceSafe(GoiocSerializer)
 					if err != nil {
 						panic(err)
 					}
@@ -257,7 +257,7 @@ func createHandler(endpoint Endpoint) http.Handler {
 						panic(err)
 					}
 				} else {
-					webResponseSerializer, err := di.GetInstanceSafe(ResponseSerializer)
+					webResponseSerializer, err := di.GetInstanceSafe(GoiocSerializer)
 					if err != nil {
 						panic(err)
 					}

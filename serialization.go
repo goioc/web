@@ -20,11 +20,11 @@ import (
 	"reflect"
 )
 
-// ResponseSerializer is an ID for Serializer bean. By default, points to JsonSerializer, but can be overwritten.
-const ResponseSerializer = "responseSerializer"
+// GoiocSerializer is an ID for Serializer bean. By default, points to JsonSerializer, but can be overwritten.
+const GoiocSerializer = "goiocSerializer"
 
 func init() {
-	if _, err := di.RegisterBean(ResponseSerializer, reflect.TypeOf((*JsonSerializer)(nil))); err != nil {
+	if _, err := di.RegisterBean(GoiocSerializer, reflect.TypeOf((*JsonSerializer)(nil))); err != nil {
 		panic(err)
 	}
 }
