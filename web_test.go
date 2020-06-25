@@ -186,11 +186,15 @@ func (e *endpoint10) REST(body []byte) string {
 	return string(body)
 }
 
-type binaryUnmarshalableStruct struct {
+type binaryStruct struct {
 	a string
 }
 
-func (b *binaryUnmarshalableStruct) UnmarshalBinary(data []byte) error {
+func (b *binaryStruct) MarshalBinary() (data []byte, err error) {
+	return []byte(b.a), nil
+}
+
+func (b *binaryStruct) UnmarshalBinary(data []byte) error {
 	b.a = string(data)
 	return nil
 }
@@ -204,16 +208,20 @@ func (e endpoint11) HandlerFuncName() string {
 	return "REST"
 }
 
-func (e *endpoint11) REST(body binaryUnmarshalableStruct) string {
-	return body.a
+func (e *endpoint11) REST(body binaryStruct) *binaryStruct {
+	return &body
 }
 
-type textUnmarshalableStruct struct {
+type textStruct struct {
 	a string
 }
 
-func (b *textUnmarshalableStruct) UnmarshalText(data []byte) error {
-	b.a = string(data)
+func (t *textStruct) MarshalBinary() (data []byte, err error) {
+	return []byte(t.a), nil
+}
+
+func (t *textStruct) UnmarshalText(data []byte) error {
+	t.a = string(data)
 	return nil
 }
 
@@ -226,8 +234,8 @@ func (e endpoint12) HandlerFuncName() string {
 	return "REST"
 }
 
-func (e *endpoint12) REST(body textUnmarshalableStruct) string {
-	return body.a
+func (e *endpoint12) REST(body textStruct) *textStruct {
+	return &body
 }
 
 type endpoint13 struct {
@@ -293,7 +301,7 @@ func (e endpoint17) HandlerFuncName() string {
 	return "REST"
 }
 
-func (e *endpoint17) REST() io.Reader {
+func (e *endpoint17) REST() io.ReadCloser {
 	return ioutil.NopCloser(bytes.NewBufferString("test"))
 }
 
