@@ -18,16 +18,16 @@ import (
 	"net/http"
 )
 
-type Endpoint1 struct {
-	method  interface{} `web.methods:"GET"`
-	path    interface{} `web.path:"/endpoint1"`
+type endpoint1 struct {
+	method interface{} `web.methods:"GET"`
+	path   interface{} `web.path:"/endpoint1"`
 }
 
-func (e Endpoint1) HandlerFuncName() string {
+func (e endpoint1) HandlerFuncName() string {
 	return "REST"
 }
 
-func (e *Endpoint1) REST(w http.ResponseWriter) {
+func (e *endpoint1) REST(w http.ResponseWriter) {
 	_, err := w.Write([]byte("test"))
 	if err != nil {
 		panic(err)

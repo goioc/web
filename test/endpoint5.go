@@ -14,16 +14,16 @@
 
 package test
 
-type Endpoint5 struct {
+type endpoint5 struct {
 	method  interface{} `web.methods:"GET"`
 	path    interface{} `web.path:"/endpoint5/{key}/{*?}"`
 	headers interface{} `web.matcher:"matcher"`
 }
 
-func (e Endpoint5) HandlerFuncName() string {
+func (e endpoint5) HandlerFuncName() string {
 	return "REST"
 }
 
-func (e *Endpoint5) REST(pathParams map[string]string) string {
+func (e *endpoint5) REST(pathParams map[string]string) string {
 	return pathParams["key"]
 }

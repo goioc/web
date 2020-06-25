@@ -16,15 +16,15 @@ package test
 
 import "context"
 
-type Endpoint6 struct {
-	method  interface{} `web.methods:"GET"`
-	path    interface{} `web.path:"/endpoint6"`
+type endpoint6 struct {
+	method interface{} `web.methods:"GET"`
+	path   interface{} `web.path:"/endpoint6"`
 }
 
-func (e Endpoint6) HandlerFuncName() string {
+func (e endpoint6) HandlerFuncName() string {
 	return "REST"
 }
 
-func (e *Endpoint6) REST(ctx context.Context) string {
+func (e *endpoint6) REST(ctx context.Context) string {
 	return ctx.Value("key").(string)
 }

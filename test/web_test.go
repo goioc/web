@@ -43,17 +43,18 @@ func (suite *TestSuite) SetupSuite() {
 		})
 		return &matcherFunc, nil
 	})
-	_, err = di.RegisterBean("endpoint1", reflect.TypeOf((*Endpoint1)(nil)))
 	assert.NoError(suite.T(), err)
-	_, err = di.RegisterBean("endpoint2", reflect.TypeOf((*Endpoint2)(nil)))
+	_, err = di.RegisterBean("endpoint1", reflect.TypeOf((*endpoint1)(nil)))
 	assert.NoError(suite.T(), err)
-	_, err = di.RegisterBean("endpoint3", reflect.TypeOf((*Endpoint3)(nil)))
+	_, err = di.RegisterBean("endpoint2", reflect.TypeOf((*endpoint2)(nil)))
 	assert.NoError(suite.T(), err)
-	_, err = di.RegisterBean("endpoint4", reflect.TypeOf((*Endpoint4)(nil)))
+	_, err = di.RegisterBean("endpoint3", reflect.TypeOf((*endpoint3)(nil)))
 	assert.NoError(suite.T(), err)
-	_, err = di.RegisterBean("endpoint5", reflect.TypeOf((*Endpoint5)(nil)))
+	_, err = di.RegisterBean("endpoint4", reflect.TypeOf((*endpoint4)(nil)))
 	assert.NoError(suite.T(), err)
-	_, err = di.RegisterBean("endpoint6", reflect.TypeOf((*Endpoint6)(nil)))
+	_, err = di.RegisterBean("endpoint5", reflect.TypeOf((*endpoint5)(nil)))
+	assert.NoError(suite.T(), err)
+	_, err = di.RegisterBean("endpoint6", reflect.TypeOf((*endpoint6)(nil)))
 	assert.NoError(suite.T(), err)
 	err = di.InitializeContainer()
 	assert.NoError(suite.T(), err)
@@ -85,7 +86,7 @@ func (suite *TestSuite) TestEndpoint1() {
 
 func (suite *TestSuite) TestEndpoint2() {
 	buf := bytes.NewBufferString("test")
-	response, err := http.Post(server.URL + "/endpoint2", "", buf)
+	response, err := http.Post(server.URL+"/endpoint2", "", buf)
 	assert.NotNil(suite.T(), response)
 	assert.NoError(suite.T(), err)
 	all, err := ioutil.ReadAll(response.Body)
@@ -93,7 +94,7 @@ func (suite *TestSuite) TestEndpoint2() {
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), "test", string(all))
 	buf = bytes.NewBufferString("test")
-	request, err := http.NewRequest(http.MethodPatch, server.URL + "/endpoint2", buf)
+	request, err := http.NewRequest(http.MethodPatch, server.URL+"/endpoint2", buf)
 	assert.NotNil(suite.T(), request)
 	assert.NoError(suite.T(), err)
 	client := http.Client{}
@@ -110,7 +111,7 @@ func (suite *TestSuite) TestEndpoint2() {
 func (suite *TestSuite) TestEndpoint3() {
 	response, err := http.Get(server.URL + "/endpoint3?foo=test&id=42")
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(),  404, response.StatusCode)
+	assert.Equal(suite.T(), 404, response.StatusCode)
 	response, err = http.Get(server.URL + "/endpoint3?foo=bar&id=42")
 	assert.NoError(suite.T(), err)
 	all, err := ioutil.ReadAll(response.Body)
@@ -118,13 +119,12 @@ func (suite *TestSuite) TestEndpoint3() {
 	assert.Equal(suite.T(), "bar42", string(all))
 }
 
-
 func (suite *TestSuite) TestEndpoint4() {
-	response, err := http.Post(server.URL + "/endpoint4", "", nil)
+	response, err := http.Post(server.URL+"/endpoint4", "", nil)
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(),  404, response.StatusCode)
+	assert.Equal(suite.T(), 404, response.StatusCode)
 	buf := bytes.NewBufferString("test")
-	response, err = http.Post(server.URL + "/endpoint4", "text/plain", buf)
+	response, err = http.Post(server.URL+"/endpoint4", "text/plain", buf)
 	assert.NoError(suite.T(), err)
 	all, err := ioutil.ReadAll(response.Body)
 	assert.NoError(suite.T(), err)
@@ -134,7 +134,7 @@ func (suite *TestSuite) TestEndpoint4() {
 func (suite *TestSuite) TestEndpoint5() {
 	response, err := http.Get(server.URL + "/endpoint5/foo/baz")
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(),  404, response.StatusCode)
+	assert.Equal(suite.T(), 404, response.StatusCode)
 	response, err = http.Get(server.URL + "/endpoint5/foo/bar")
 	assert.NoError(suite.T(), err)
 	all, err := ioutil.ReadAll(response.Body)

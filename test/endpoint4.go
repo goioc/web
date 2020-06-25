@@ -14,16 +14,16 @@
 
 package test
 
-type Endpoint4 struct {
+type endpoint4 struct {
 	method  interface{} `web.methods:"POST"`
 	path    interface{} `web.path:"/endpoint4"`
 	headers interface{} `web.headers:"Content-Type,text/plain"`
 }
 
-func (e Endpoint4) HandlerFuncName() string {
+func (e endpoint4) HandlerFuncName() string {
 	return "REST"
 }
 
-func (e *Endpoint4) REST(body string) string {
+func (e *endpoint4) REST(body string) string {
 	return body
 }

@@ -18,17 +18,17 @@ import (
 	"net/url"
 )
 
-type Endpoint3 struct {
+type endpoint3 struct {
 	method  interface{} `web.methods:"GET"`
 	path    interface{} `web.path:"/endpoint3"`
 	queries interface{} `web.queries:"foo,bar,id,{id:[0-9]+}"`
 }
 
-func (e Endpoint3) HandlerFuncName() string {
+func (e endpoint3) HandlerFuncName() string {
 	return "REST"
 }
 
-func (e *Endpoint3) REST(queryParams url.Values) string {
+func (e *endpoint3) REST(queryParams url.Values) string {
 	foo := queryParams.Get("foo")
 	id := queryParams.Get("id")
 	return foo + id

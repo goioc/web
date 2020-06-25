@@ -19,16 +19,16 @@ import (
 	"net/http"
 )
 
-type Endpoint2 struct {
-	method  interface{} `web.methods:"post,patch"`
-	path    interface{} `web.path:"/endpoint2"`
+type endpoint2 struct {
+	method interface{} `web.methods:"post,patch"`
+	path   interface{} `web.path:"/endpoint2"`
 }
 
-func (e Endpoint2) HandlerFuncName() string {
+func (e endpoint2) HandlerFuncName() string {
 	return "REST"
 }
 
-func (e *Endpoint2) REST(w http.ResponseWriter, r *http.Request) {
+func (e *endpoint2) REST(w http.ResponseWriter, r *http.Request) {
 	all, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		panic(err)
