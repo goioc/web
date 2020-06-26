@@ -84,7 +84,7 @@ type endpoint struct {
 ...
 ```
 
-Now our endpoint is bound to the `GET` requests at the `/hello` path. Yes, it's that simple! 🙂
+Now our endpoint is bound to a `GET` requests at the `/hello` path. Yes, it's that simple! 🙂
 
 ### `goioc/web` tags
 
