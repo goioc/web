@@ -65,7 +65,7 @@ _ = web.ListenAndServe(":8080")
 ... or using returned `Router`
 ```go
 router, _ := CreateRouter()
-_ = http.ListenAndServe("", router)
+_ = http.ListenAndServe(":8080", router)
 ```
 
 ## Routing
