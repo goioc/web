@@ -126,3 +126,82 @@ func (e *endpoint) Hello(pathParams map[string]string) (http.Header, int) {
 }
 ...
 ```
+
+### Supported argument types
+
+- `http.ResponseWriter`
+- `*http.Request`
+- `context.Context`
+- `http.Header`
+- `io.Reader`
+- `io.ReadCloser`
+- `[]byte`
+- `string`
+- `map[string]string`
+- `url.Values`
+- `struct` implementing `encoding.BinaryUnmarshaler` or `encoding.TextUnmarshaler`
+- `interface{}` (`GoiocSerializer` bean is used to deserialize such arguments)
+
+### Supported return types
+
+- `http.Header` (response headers, must be first return argument, if used)
+- `int` (status code, must be first argument after response headers, if used)
+- `io.Reader`
+- `io.ReadCloser`
+- `[]byte`
+- `string`
+- `struct` implementing `encoding.BinaryMarshaler` or `encoding.TextMarshaler`
+- `interface{}` (`GoiocSerializer` bean is used to serialize such returned object)
+
+### Can I use it with templates?
+
+Yes, you can! 💪
+
+**todo.html**
+```html
+<h1>{{.PageTitle}}</h1>
+<ul>
+    {{range .Todos}}
+        {{if .Done}}
+            <li class="done">{{.Title}}</li>
+        {{else}}
+            <li>{{.Title}}</li>
+        {{end}}
+    {{end}}
+</ul>
+```
+
+**endpoint.go**
+```go
+type todo struct {
+	Title string
+	Done  bool
+}
+type todoPageData struct {
+	PageTitle string
+	Todos     []todo
+}
+
+type todoEndpoint struct {
+	method interface{} `web.methods:"GET"`
+	path   interface{} `web.path:"/todo"`
+}
+
+func (e todoEndpoint) HandlerFuncName() string {
+	return "REST"
+}
+
+func (e *todoEndpoint) TodoList() (template.Template, interface{}) {
+	tmpl := template.Must(template.ParseFiles("todo.html"))
+	return *tmpl, todoPageData{
+		PageTitle: "My TODO list",
+		Todos: []todo{
+			{Title: "Task 1", Done: false},
+			{Title: "Task 2", Done: true},
+			{Title: "Task 3", Done: true},
+		},
+	}
+}
+```
+
+**Note** that in case of using templates, the next returned object after `template.Template` must be the actual structure that will be used to fill in the template 💡
