@@ -206,7 +206,7 @@ func (e *todoEndpoint) TodoList() (template.Template, interface{}) {
 
 **Note** that in case of using templates, the next returned object after `template.Template` must be the actual structure that will be used to fill in the template 💡
 
-### Custom matchers
+## Custom matchers
 
 If functionality of `web.methods`, `web.path`, `web.queries` and `web.headers` is not enough for you, you can use custom matcher, 
 based on Gorilla's `mux.MatcherFunc`:
