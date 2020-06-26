@@ -153,9 +153,9 @@ func (e *endpoint) Hello(pathParams map[string]string) (http.Header, int) {
 - `struct` implementing `encoding.BinaryMarshaler` or `encoding.TextMarshaler`
 - `interface{}` (`GoiocSerializer` bean is used to serialize such returned object)
 
-### Can I use it with templates?
+### Templates
 
-Yes, you can! 💪
+`goioc/web` supports templates!
 
 **todo.html**
 ```html
@@ -188,7 +188,7 @@ type todoEndpoint struct {
 }
 
 func (e todoEndpoint) HandlerFuncName() string {
-	return "REST"
+	return "TodoList"
 }
 
 func (e *todoEndpoint) TodoList() (template.Template, interface{}) {
@@ -205,3 +205,52 @@ func (e *todoEndpoint) TodoList() (template.Template, interface{}) {
 ```
 
 **Note** that in case of using templates, the next returned object after `template.Template` must be the actual structure that will be used to fill in the template 💡
+
+### Custom matchers
+
+If functionality of `web.methods`, `web.path`, `web.queries` and `web.headers` is not enough for you, you can use custom matcher, 
+based on Gorilla's `mux.MatcherFunc`:
+
+```go
+...
+_, _ = di.RegisterBeanFactory("matcher", di.Singleton, func() (interface{}, error) {
+		matcherFunc := mux.MatcherFunc(func(request *http.Request, match *mux.RouteMatch) bool {
+			return strings.HasSuffix(request.URL.Path, "bar")
+		})
+		return &matcherFunc, nil
+	})
+
+...
+
+type endpoint struct {
+	method  interface{} `web.methods:"GET"`
+	path    interface{} `web.path:"/endpoint/{key}/{*?}"`
+	matcher interface{} `web.matcher:"matcher"`
+}
+
+func (e endpoint) HandlerFuncName() string {
+	return "Match"
+}
+
+func (e *endpoint) Match() string {
+	return "It's a match! :)"
+}
+...
+```
+```bash
+$ curl localhost:8080/endpoint/foo/bar
+It's a match! :)                
+```
+
+## Middleware
+
+Of course, custom middleware is also supported by the framework:
+
+```go
+web.Use(func(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), di.BeanKey("key"), "value")))
+	})
+})
+```
+

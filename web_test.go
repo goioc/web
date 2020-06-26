@@ -104,7 +104,7 @@ func (e *endpoint4) REST(body string) string {
 type endpoint5 struct {
 	method  interface{} `web.methods:"GET"`
 	path    interface{} `web.path:"/endpoint5/{key}/{*?}"`
-	headers interface{} `web.matcher:"matcher"`
+	matcher interface{} `web.matcher:"matcher"`
 }
 
 func (e endpoint5) HandlerFuncName() string {
