@@ -12,9 +12,9 @@
 
 ## How this framework is different from others?
 
-1. First of all, `goioc/web` is working using Dependency Injection and is based on [goioc/di](https://github.com/goioc/di), which is basically the IoC Container.
+1. First of all, `goioc/web` is working using Dependency Injection and is based on [goioc/di](https://github.com/goioc/di), which is the IoC Container.
 2. Secondly - and this is the most exciting part - web-endpoints in `goioc/web` can have (almost) arbitrary signature! 
-No more `func(w http.ResponseWriter, r *http.Request)` handlers! If your endpoint receives a string and produces a binary stream, just declare it as is:
+No more `func(w http.ResponseWriter, r *http.Request)` handlers, if your endpoint receives a `string` and produces a binary stream, just declare it as is:
 
 ```go
 ...
@@ -24,7 +24,7 @@ func (e *endpoint) Hello(name string) io.Reader {
 ...
 ```
 
-Of course, you can still directly use `http.ResponseWriter` and `*http.Request`, if you like.
+Cool, huh? 🤠 Of course, you can still directly use `http.ResponseWriter` and `*http.Request`, if you like.
 
 ## Basic concepts
 
@@ -51,7 +51,7 @@ In order for `goioc/web` to pick up this endpoint, it should be registered in th
 _, _ = di.RegisterBean("endpoint", reflect.TypeOf((*endpoint)(nil)))
 ```
 
-And then the container should be initialized (please, refer to the [goioc/di](https://github.com/goioc/di) documentation for more details):
+Then the container should be initialized (please, refer to the [goioc/di](https://github.com/goioc/di) documentation for more details):
 
 ```go
 _ = di.InitializeContainer()
@@ -96,3 +96,33 @@ Now our endpoint is bound to the `GET` requests at the `/hello` path. Yes, it's 
 | `web.headers` | Key-value paris of the request headers.   | `web.headers:"Content-Type,application/octet-stream"` |
 | `web.matcher` | ID of the bean of type `*mux.MatcherFunc`.| `web.matcher:"matcher"`                               |
 
+## In and Out types
+
+As was mentioned above, with `goioc/web` you get a lot of freedom in terms of defining the signature of your endpoint's method. 
+Just look at these examples:
+
+```go
+...
+func (e *endpoint) Error() (int, string) {
+	return 505, "Something bad happened :("
+}
+...
+```
+
+```go
+...
+func (e *endpoint) KeyValue(ctx context.Context) string {
+	return ctx.Value(di.BeanKey("key")).(string)
+}
+...
+```
+
+```go
+...
+func (e *endpoint) Hello(pathParams map[string]string) (http.Header, int) {
+	return map[string][]string{
+    		"Content-Type": {"application/octet-stream"},
+    	}, []byte("Hello, " + pathParams["name"] + "!")
+}
+...
+```
