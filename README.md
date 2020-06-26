@@ -10,7 +10,7 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=goioc_web&metric=alert_status)](https://sonarcloud.io/dashboard?id=goioc_web)
 [![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/goioc/web/?ref=repository-badge)
 
-## How this framework is different from others?
+## How is this framework different from others?
 
 1. First of all, `goioc/web` is working using Dependency Injection and is based on [goioc/di](https://github.com/goioc/di), which is the IoC Container.
 2. Secondly - and this is the most exciting part - web-endpoints in `goioc/web` can have (almost) arbitrary signature! 
