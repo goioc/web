@@ -391,7 +391,7 @@ type TestSuite struct {
 }
 
 func (suite *TestSuite) SetupSuite() {
-	_, err := di.RegisterBeanFactory("matcher", di.Singleton, func() (interface{}, error) {
+	_, err := di.RegisterBeanFactory("matcher", di.Singleton, func(ctx context.Context) (interface{}, error) {
 		matcherFunc := mux.MatcherFunc(func(request *http.Request, match *mux.RouteMatch) bool {
 			return strings.HasSuffix(request.URL.Path, "bar")
 		})

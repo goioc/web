@@ -212,7 +212,7 @@ based on Gorilla's `mux.MatcherFunc`:
 
 ```go
 ...
-_, _ = di.RegisterBeanFactory("matcher", di.Singleton, func() (interface{}, error) {
+_, _ = di.RegisterBeanFactory("matcher", di.Singleton, func(context.Context) (interface{}, error) {
 		matcherFunc := mux.MatcherFunc(func(request *http.Request, match *mux.RouteMatch) bool {
 			return strings.HasSuffix(request.URL.Path, "bar")
 		})
