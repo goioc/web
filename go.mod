@@ -1,6 +1,6 @@
 module github.com/goioc/web
 
-go 1.16
+go 1.21
 
 require (
 	github.com/goioc/di v1.7.1
